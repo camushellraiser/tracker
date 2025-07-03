@@ -127,43 +127,50 @@ if st.sidebar.button("🔄 Reset"):
 # --- Main Title ---
 st.title("📋 Project Step Tracker")
 
-# --- CSS & Tooltip Image ---
-# Load and encode image
-try:
+# --- CSS & Tooltip with best practice (image on hover) ---
+# Load tooltip image
+tooltip_b64 = ''
+if os.path.exists('languageselection.jpg'):
     with open('languageselection.jpg', 'rb') as img:
-        b64_data = base64.b64encode(img.read()).decode()
-except FileNotFoundError:
-    b64_data = ''
+        tooltip_b64 = base64.b64encode(img.read()).decode()
 st.markdown(f"""
 <style>
+  /* Table styling */
   table.custom {{ width:100%; border-collapse: collapse; }}
   table.custom th, table.custom td {{ padding:8px; border:1px solid #444; }}
   table.custom th {{ background-color:#333; color:white; text-align:center; }}
   table.custom td:nth-child(2) {{ text-align:center; }}
-  .tooltip {{
-    position: relative;
-    display: inline-block;
-    cursor: help;
-  }}
-  .tooltip img {{
+  /* Tooltip container */
+  .tooltip {{ position: relative; display: inline-block; }}
+  .tooltip-icon {{ font-size: 16px; color: #888; margin-left: 4px; vertical-align: middle; }}
+  /* Hidden tooltip content */
+  .tooltip-content {{
     visibility: hidden;
-    opacity: 0;
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translate(8px, -50%);
-    max-width: 200px;
-    max-height: 150px;
-    border: 1px solid #444;
-    background-color: #111;
+    width: 200px;
+    background-color: #222;
+    border: 1px solid #555;
     padding: 4px;
-    transition: opacity 0.2s ease-in-out;
-    z-index: 1000;
+    position: absolute;
+    z-index: 999;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px;
   }}
-  .tooltip:hover img {{
-    visibility: visible;
-    opacity: 1;
+  /* Tooltip arrow */
+  .tooltip-content::after {{
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #222 transparent transparent transparent;
   }}
+  /* Show on hover */
+  .tooltip:hover .tooltip-content {{ visibility: visible; opacity: 1; }}
+  .tooltip img {{ max-width: 100%; height: auto; display: block; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -201,13 +208,25 @@ if selected:
         if 'Marketing' in pdata['types']:
             st.markdown("---\n**Marketing Steps**")
             for step in MARKETING_STEPS:
-                if step == 'Create the AEM project':
-                    cols = st.columns([5,1])
-                    with cols[0]:
-                        val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
-                        pdata['steps'][step] = val
-                    with cols[1]:
-                        st.markdown("<div class='tooltip'>🛈<div class='tooltipimg'></div></div>", unsafe_allow_html=True)
+    if step == 'Create the AEM project':
+        # Render checkbox with tooltip icon and hidden image on hover
+        cols = st.columns([0.9, 0.1])
+        with cols[0]:
+            val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
+            pdata['steps'][step] = val
+        with cols[1]:
+            # best-practice tooltip structure
+            img_html = (
+                f"<div class='tooltip'>"
+                f"<span class='tooltip-icon'>🛈</span>"
+                f"<div class='tooltip-content'><img src='data:image/jpeg;base64,{tooltip_b64}' /></div>"
+                f"</div>"
+            )
+            st.markdown(img_html, unsafe_allow_html=True)
+    else:
+        val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
+        pdata['steps'][step] = val
+("<div class='tooltip'>🛈<div class='tooltipimg'></div></div>", unsafe_allow_html=True)
                 else:
                     val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
                     pdata['steps'][step] = val
