@@ -193,23 +193,28 @@ if selected:
     pdata = projects[selected]
     st.markdown(f"<h2>Project {selected}</h2>", unsafe_allow_html=True)
     with st.expander("Details", expanded=True):
+        # URL and notes
         pdata['url'] = st.text_input("Project URL", pdata['url'], key=f"url_{selected}")
         pdata['notes'] = st.text_area("Notes", pdata['notes'], key=f"notes_{selected}")
+        # Common Steps
         st.markdown("**Common Steps**")
         for step in COMMON_STEPS:
             val = st.checkbox(step, value=pdata['steps'][step], key=f"c_{selected}_{step}")
             pdata['steps'][step] = val
+        # Request type
         pdata['types'] = st.multiselect("Request Type", ['Marketing','Product'], default=pdata['types'], key=f"type_{selected}")
+        # Product Steps
         if 'Product' in pdata['types']:
-            st.markdown("---\n**Product Steps**")
+            st.markdown("---
+**Product Steps**")
             for step in PRODUCT_STEPS:
                 val = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
                 pdata['steps'][step] = val
-                if 'Marketing' in pdata['types']:
+        # Marketing Steps
+        if 'Marketing' in pdata['types']:
             st.markdown("---
 **Marketing Steps**")
             for step in MARKETING_STEPS:
-                # For the special step, render tooltip
                 if step == 'Create the AEM project':
                     cols = st.columns([0.9, 0.1])
                     with cols[0]:
@@ -226,10 +231,13 @@ if selected:
                 else:
                     val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
                     pdata['steps'][step] = val
+        # Final Step
         st.markdown("---")
         val = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"f_{selected}")
         pdata['steps'][FINAL_STEP] = val
+        # Persist changes
         save_data()
+        # Attachments
         files = st.file_uploader("Attachments", accept_multiple_files=True, key=f"a_{selected}")
         if files:
             adir = os.path.join(ATTACH_DIR, selected)
