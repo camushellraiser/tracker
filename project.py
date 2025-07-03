@@ -14,25 +14,7 @@ DATA_FILE = "project_status.json"
 ATTACH_DIR = "attachments"
 
 # Ensure attachments directory exists
-os.makedirs(ATTACH_DIR, exist_ok=True)
-
-# --- Helpers ---
-def save_data():
-    """Save projects to disk."""
-    with open(DATA_FILE, 'w') as f:
-        json.dump(projects, f, indent=2)
-
-def reset_session():
-    """Clear Streamlit session state."""
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-
-# --- Load existing projects ---
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, 'r') as f:
-        projects = json.load(f)
-else:
-    projects = {}
+ios.makedirs(ATTACH_DIR, exist_ok=True)
 
 # --- Define steps ---
 COMMON_STEPS = [
@@ -74,6 +56,21 @@ MARKETING_STEPS = [
 ]
 FINAL_STEP = "Make sure the shared folder is properly updated"
 ALL_STEPS = COMMON_STEPS + PRODUCT_STEPS + MARKETING_STEPS + [FINAL_STEP]
+
+# --- Load or initialize projects in session_state ---
+if 'projects' not in st.session_state:
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            st.session_state.projects = json.load(f)
+    else:
+        st.session_state.projects = {}
+projects = st.session_state.projects
+
+# --- Helpers ---
+def save_data():
+    """Save projects from session state to disk."""
+    with open(DATA_FILE, 'w') as f:
+        json.dump(st.session_state.projects, f, indent=2)
 
 # --- Sidebar: Add New Project ---
 st.sidebar.header("➕ New Project ID")
@@ -131,8 +128,8 @@ if st.sidebar.button("💾 Save Progress"):
     save_data()
     st.sidebar.success("Progress saved.")
 if st.sidebar.button("🔄 Reset"):
-    reset_session()
-    st.sidebar.success("Selections cleared.")
+    st.session_state.clear()
+    st.experimental_rerun()
 
 # --- Main Title ---
 st.title("📋 Project Step Tracker")
@@ -161,14 +158,9 @@ for pid, pdata in projects.items():
 if overview_data:
     st.subheader("📊 Overview")
     df_over = pd.DataFrame(overview_data)
-    # Limit to first 10 rows
-    visible_df = df_over.head(10).copy()
-    # Render HTML table with custom class
+    visible_df = df_over.head(10)
     html_table = visible_df.to_html(index=False, classes='custom', escape=True)
-    # Wrap in scrollable div
-    scrollable = (
-        "<div style='max-height:300px; overflow-y:auto;'>" + html_table + "</div>"
-    )
+    scrollable = ("<div style='max-height:300px; overflow-y:auto;'>" + html_table + "</div>")
     st.markdown(scrollable, unsafe_allow_html=True)
 
 # --- Project Details ---
@@ -176,24 +168,32 @@ if selected:
     pdata = projects[selected]
     st.markdown(f"<h2 style='margin-top:20px'>Project {selected}</h2>", unsafe_allow_html=True)
     with st.expander("Details", expanded=True):
+        # Update URL and notes immediately
         pdata['url'] = st.text_input("Project URL", pdata.get('url',''), key=f"url_{selected}")
+        pdata['notes'] = st.text_area("Notes", pdata.get('notes',''), key=f"notes_{selected}")
+        # Steps toggles auto-update state
         st.markdown("**Common Steps**")
         for step in COMMON_STEPS:
-            pdata['steps'][step] = st.checkbox(step, value=pdata['steps'][step], key=f"c_{selected}_{step}")
+            changed = st.checkbox(step, value=pdata['steps'][step], key=f"c_{selected}_{step}")
+            pdata['steps'][step] = changed
         pdata['types'] = st.multiselect("Request Type", ['Marketing','Product'], default=pdata.get('types', []), key=f"type_{selected}")
         if 'Product' in pdata['types']:
             st.markdown("---\n**Product Steps**")
             for step in PRODUCT_STEPS:
-                pdata['steps'][step] = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
+                changed = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
+                pdata['steps'][step] = changed
         if 'Marketing' in pdata['types']:
             st.markdown("---\n**Marketing Steps**")
             for step in MARKETING_STEPS:
                 help_txt = "Use English regional page for source. Create different projects for each target language." if step == 'Create the AEM project' else None
-                pdata['steps'][step] = st.checkbox(step, value=pdata['steps'][step], help=help_txt, key=f"m_{selected}_{step}")
+                changed = st.checkbox(step, value=pdata['steps'][step], help=help_txt, key=f"m_{selected}_{step}")
+                pdata['steps'][step] = changed
         st.markdown("---")
-        pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"f_{selected}")
-        st.markdown("---")
-        pdata['notes'] = st.text_area("Notes", pdata.get('notes',''), key=f"notes_{selected}")
+        changed = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"f_{selected}")
+        pdata['steps'][FINAL_STEP] = changed
+        # Save after toggling to reflect in overview
+        save_data()
+        # Attachments
         files = st.file_uploader("Attachments", accept_multiple_files=True, key=f"a_{selected}")
         if files:
             adir = os.path.join(ATTACH_DIR, selected)
