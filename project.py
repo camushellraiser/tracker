@@ -94,28 +94,30 @@ if st.sidebar.button("Add Project"):
         save_data()
         st.sidebar.success(f"Project {pid} added.")
 
-# --- Sidebar: Search & Select Project ---
+# --- Sidebar: Select Project ---
 st.sidebar.markdown("---")
-st.sidebar.header("🔎 Search & Select Project")
+st.sidebar.header("🔎 Select Project")
 search_term = st.sidebar.text_input("Search Project ID", key="search_proj")
-sorted_projects = sorted(projects.keys(), key=lambda x: projects[x]['created_at'], reverse=True)
-filtered_projects = [p for p in sorted_projects if not search_term or search_term.lower() in p.lower()]
-select_options = [""] + filtered_projects
-selected = st.sidebar.selectbox("Select Project", select_options, key="selected_project")
+sorted_projects = sorted(
+    projects.keys(),
+    key=lambda x: projects[x].get('created_at',''),
+    reverse=True
+)
+filtered = [p for p in sorted_projects if not search_term or search_term.lower() in p.lower()]
+options = [""] + filtered
+selected = st.sidebar.selectbox("Select Project", options, key="selected_project")
 
 # --- Sidebar: Tools ---
 st.sidebar.markdown("---")
 st.sidebar.header("🛠️ Tools")
-tools = [
-    ("Naming Generator", "https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/"),
-    ("URL Converter", "https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/"),
-    ("Generate Links", "https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter")
-]
-for name, link in tools:
-    html = f"<a href='{link}' style='text-decoration:none;'><button style='width:100%; margin:4px 0; padding:8px; background-color:#44475a; color:white; border:none; border-radius:4px;'>{name}</button></a>"
-    st.sidebar.markdown(html, unsafe_allow_html=True)
+for name, link in [
+    ("Naming Generator","https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/"),
+    ("URL Converter","https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/"),
+    ("Generate Links","https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter")
+]:
+    st.sidebar.markdown(f"<a href='{link}' target='_blank'><button>{name}</button></a>", unsafe_allow_html=True)
 
-# --- Sidebar: Save & Reset ---
+# --- Save & Reset ---
 st.sidebar.markdown("---")
 if st.sidebar.button("💾 Save Progress"):
     save_data()
@@ -124,130 +126,39 @@ if st.sidebar.button("🔄 Reset"):
     st.session_state.clear()
     st.experimental_rerun()
 
-# --- Main Title ---
+# --- Title ---
 st.title("📋 Project Step Tracker")
 
-# --- CSS & Tooltip with best practice (image on hover) ---
-# Load tooltip image
-tooltip_b64 = ''
-if os.path.exists('languageselection.jpg'):
-    with open('languageselection.jpg', 'rb') as img:
-        tooltip_b64 = base64.b64encode(img.read()).decode()
-st.markdown(f"""
-<style>
-  /* Table styling */
-  table.custom {{ width:100%; border-collapse: collapse; }}
-  table.custom th, table.custom td {{ padding:8px; border:1px solid #444; }}
-  table.custom th {{ background-color:#333; color:white; text-align:center; }}
-  table.custom td:nth-child(2) {{ text-align:center; }}
-  /* Tooltip container */
-  .tooltip {{ position: relative; display: inline-block; }}
-  .tooltip-icon {{ font-size: 16px; color: #888; margin-left: 4px; vertical-align: middle; }}
-  /* Hidden tooltip content */
-  .tooltip-content {{
-    visibility: hidden;
-    width: 200px;
-    background-color: #222;
-    border: 1px solid #555;
-    padding: 4px;
-    position: absolute;
-    z-index: 999;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 4px;
-  }}
-  /* Tooltip arrow */
-  .tooltip-content::after {{
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #222 transparent transparent transparent;
-  }}
-  /* Show on hover */
-  .tooltip:hover .tooltip-content {{ visibility: visible; opacity: 1; }}
-  .tooltip img {{ max-width: 100%; height: auto; display: block; }}
-</style>
-""", unsafe_allow_html=True)
-
-# --- Overview Table ---
-overview = []
-for pid, pdata in projects.items():
-    types = pdata['types']
-    total = len(COMMON_STEPS) + (len(PRODUCT_STEPS) if 'Product' in types else 0) + (len(MARKETING_STEPS) if 'Marketing' in types else 0) + 1
+# --- Overview ---
+st.subheader("📊 Overview")
+data = []
+for pid,pdata in projects.items():
+    total = len(COMMON_STEPS) + (len(PRODUCT_STEPS) if 'Product' in pdata['types'] else 0) + (len(MARKETING_STEPS) if 'Marketing' in pdata['types'] else 0) + 1
     done = sum(pdata['steps'].values())
     pct = int(done/total*100) if total else 0
-    overview.append({'Project': pid, '% Complete': pct, 'URL': pdata['url']})
-if overview:
-    st.subheader("📊 Overview")
-    df = pd.DataFrame(overview).head(10)
-    html = df.to_html(index=False, classes='custom', escape=True)
-    st.markdown(f"<div style='max-height:300px; overflow-y:auto;'>{html}</div>", unsafe_allow_html=True)
+    data.append({'Project':pid,'% Complete':pct,'URL':pdata['url']})
+if data:
+    df = pd.DataFrame(data).head(10)
+    html = df.to_html(index=False,classes='custom')
+    st.markdown(f"<div style='max-height:300px;overflow-y:auto;'>{html}</div>",unsafe_allow_html=True)
 
-# --- Project Details ---
+# --- Details ---
 if selected:
+    st.header(f"Project {selected}")
     pdata = projects[selected]
-    st.markdown(f"<h2>Project {selected}</h2>", unsafe_allow_html=True)
-    with st.expander("Details", expanded=True):
-        # URL and notes
-        pdata['url'] = st.text_input("Project URL", pdata['url'], key=f"url_{selected}")
-        pdata['notes'] = st.text_area("Notes", pdata['notes'], key=f"notes_{selected}")
-        # Common Steps
-        st.markdown("**Common Steps**")
-        for step in COMMON_STEPS:
-            val = st.checkbox(step, value=pdata['steps'][step], key=f"c_{selected}_{step}")
-            pdata['steps'][step] = val
-        # Request type
-        pdata['types'] = st.multiselect("Request Type", ['Marketing','Product'], default=pdata['types'], key=f"type_{selected}")
-        # Product Steps
-        if 'Product' in pdata['types']:
-                        st.markdown("---
-**Product Steps**")
-            for step in PRODUCT_STEPS:
-                val = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
-                pdata['steps'][step] = val
-        # Marketing Steps
-        if 'Marketing' in pdata['types']:
-                        st.markdown("---
-**Marketing Steps**")
-            for step in MARKETING_STEPS:
-                if step == 'Create the AEM project':
-                    cols = st.columns([0.9, 0.1])
-                    with cols[0]:
-                        val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
-                        pdata['steps'][step] = val
-                    with cols[1]:
-                        tooltip_html = (
-                            f"<div class='tooltip'>"
-                            f"<span class='tooltip-icon'>🛈</span>"
-                            f"<div class='tooltip-content'><img src='data:image/jpeg;base64,{tooltip_b64}' /></div>"
-                            f"</div>"
-                        )
-                        st.markdown(tooltip_html, unsafe_allow_html=True)
-                else:
-                    val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
-                    pdata['steps'][step] = val
-        # Final Step
-        st.markdown("---")
-        val = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"f_{selected}")
-        pdata['steps'][FINAL_STEP] = val
-        # Persist changes
-        save_data()
-        # Attachments
-        files = st.file_uploader("Attachments", accept_multiple_files=True, key=f"a_{selected}")
-        if files:
-            adir = os.path.join(ATTACH_DIR, selected)
-            os.makedirs(adir, exist_ok=True)
-            for f in files:
-                with open(os.path.join(adir, f.name), 'wb') as out:
-                    out.write(f.getbuffer())
-            pdata['attachments'] = os.listdir(adir)
-        if pdata.get('attachments'):
-            st.markdown("**Attachments**")
-            for fn in pdata['attachments']:
-                with open(os.path.join(ATTACH_DIR, selected, fn), 'rb') as fp:
-                    st.download_button(fn, fp.read(), file_name=fn)
+    pdata['url'] = st.text_input("Project URL", pdata['url'], key='url')
+    pdata['notes'] = st.text_area("Notes", pdata['notes'], key='notes')
+    st.markdown("**Common Steps**")
+    for s in COMMON_STEPS:
+        pdata['steps'][s] = st.checkbox(s,value=pdata['steps'][s],key=s)
+    pdata['types'] = st.multiselect("Request Type",['Marketing','Product'],default=pdata['types'])
+    if 'Product' in pdata['types']:
+        st.markdown("**Product Steps**")
+        for s in PRODUCT_STEPS:
+            pdata['steps'][s] = st.checkbox(s,value=pdata['steps'][s],key=s)
+    if 'Marketing' in pdata['types']:
+        st.markdown("**Marketing Steps**")
+        for s in MARKETING_STEPS:
+            pdata['steps'][s] = st.checkbox(s,value=pdata['steps'][s],key=s)
+    pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP,value=pdata['steps'][FINAL_STEP])
+    save_data()
