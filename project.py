@@ -205,28 +205,24 @@ if selected:
             for step in PRODUCT_STEPS:
                 val = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
                 pdata['steps'][step] = val
-        if 'Marketing' in pdata['types']:
-            st.markdown("---\n**Marketing Steps**")
+                if 'Marketing' in pdata['types']:
+            st.markdown("---
+**Marketing Steps**")
             for step in MARKETING_STEPS:
-    if step == 'Create the AEM project':
-        # Render checkbox with tooltip icon and hidden image on hover
-        cols = st.columns([0.9, 0.1])
-        with cols[0]:
-            val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
-            pdata['steps'][step] = val
-        with cols[1]:
-            # best-practice tooltip structure
-            img_html = (
-                f"<div class='tooltip'>"
-                f"<span class='tooltip-icon'>🛈</span>"
-                f"<div class='tooltip-content'><img src='data:image/jpeg;base64,{tooltip_b64}' /></div>"
-                f"</div>"
-            )
-            st.markdown(img_html, unsafe_allow_html=True)
-    else:
-        val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
-        pdata['steps'][step] = val
-("<div class='tooltip'>🛈<div class='tooltipimg'></div></div>", unsafe_allow_html=True)
+                # For the special step, render tooltip
+                if step == 'Create the AEM project':
+                    cols = st.columns([0.9, 0.1])
+                    with cols[0]:
+                        val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
+                        pdata['steps'][step] = val
+                    with cols[1]:
+                        tooltip_html = (
+                            f"<div class='tooltip'>"
+                            f"<span class='tooltip-icon'>🛈</span>"
+                            f"<div class='tooltip-content'><img src='data:image/jpeg;base64,{tooltip_b64}' /></div>"
+                            f"</div>"
+                        )
+                        st.markdown(tooltip_html, unsafe_allow_html=True)
                 else:
                     val = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
                     pdata['steps'][step] = val
