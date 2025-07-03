@@ -134,9 +134,34 @@ if st.sidebar.button("🔄 Reset"):
 # --- Main Title ---
 st.title("📋 Project Step Tracker")
 
-# --- Inject CSS for table styling ---
+# --- Inject CSS for table styling & tooltip image ---
+# Load tooltip image as Base64
+def _get_tooltip_b64():
+    import base64
+    try:
+        with open('languageselection.jpg','rb') as img:
+            return base64.b64encode(img.read()).decode()
+    except FileNotFoundError:
+        return ''
+_tooltip_b64 = _get_tooltip_b64()
+
 st.markdown(
-    """
+    f"""
+    <style>
+    table.custom {{width:100%; border-collapse: collapse;}}
+    table.custom th, table.custom td {{padding:8px; border:1px solid #444;}}    
+    table.custom th {{background-color:#333; color:white; text-align:center;}}
+    table.custom td:nth-child(2) {{text-align:center;}}
+    /* image tooltip */
+    .tooltip {{position: relative; display: inline-block;}}
+    .tooltipimg {{visibility: hidden; position: absolute; top: 100%; left: 0; width: 200px; 
+                 background: url(data:image/jpeg;base64,{_tooltip_b64}) no-repeat center/contain;
+                 border: 1px solid #444; padding: 4px; background-color: #111;}}
+    .tooltip:hover .tooltipimg {{visibility: visible;}}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
     <style>
     table.custom {width:100%; border-collapse: collapse;}
     table.custom th, table.custom td {padding:8px; border:1px solid #444;}    
@@ -184,9 +209,24 @@ if selected:
                 pdata['steps'][step] = changed
         if 'Marketing' in pdata['types']:
             st.markdown("---\n**Marketing Steps**")
-            for step in MARKETING_STEPS:
-                help_txt = "Use English regional page for source. Create different projects for each target language." if step == 'Create the AEM project' else None
-                changed = st.checkbox(step, value=pdata['steps'][step], help=help_txt, key=f"m_{selected}_{step}")
+                    for step in MARKETING_STEPS:
+            if step == 'Create the AEM project':
+                # checkbox + image tooltip
+                col1, col2 = st.columns([5,1])
+                with col1:
+                    changed = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
+                    pdata['steps'][step] = changed
+                with col2:
+                    # empty span with tooltip class
+                    st.markdown(
+                        "<div class='tooltip'>"  
+                        "<span>🛈</span>"
+                        "<div class='tooltipimg'></div>"
+                        "</div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                changed = st.checkbox(step, value=pdata['steps'][step], key=f"m_{selected}_{step}")
                 pdata['steps'][step] = changed
         st.markdown("---")
         changed = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"f_{selected}")
