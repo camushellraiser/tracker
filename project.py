@@ -131,18 +131,39 @@ st.title("📋 Project Step Tracker")
 # Load and encode image
 try:
     with open('languageselection.jpg', 'rb') as img:
-        b64 = base64.b64encode(img.read()).decode()
+        b64_data = base64.b64encode(img.read()).decode()
 except FileNotFoundError:
-    b64 = ''
+    b64_data = ''
 st.markdown(f"""
 <style>
   table.custom {{ width:100%; border-collapse: collapse; }}
   table.custom th, table.custom td {{ padding:8px; border:1px solid #444; }}
   table.custom th {{ background-color:#333; color:white; text-align:center; }}
   table.custom td:nth-child(2) {{ text-align:center; }}
-  .tooltip {{ position: relative; display: inline-block; }}
-  .tooltipimg {{ visibility: hidden; position: absolute; top:100%; left:0; width:200px; background: url(data:image/jpeg;base64,{b64}) no-repeat center/contain; border:1px solid #444; padding:4px; background-color:#111; }}
-  .tooltip:hover .tooltipimg {{ visibility: visible; }}
+  .tooltip {{
+    position: relative;
+    display: inline-block;
+    cursor: help;
+  }}
+  .tooltip img {{
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translate(8px, -50%);
+    max-width: 200px;
+    max-height: 150px;
+    border: 1px solid #444;
+    background-color: #111;
+    padding: 4px;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 1000;
+  }}
+  .tooltip:hover img {{
+    visibility: visible;
+    opacity: 1;
+  }}
 </style>
 """, unsafe_allow_html=True)
 
