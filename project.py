@@ -14,7 +14,7 @@ DATA_FILE = "project_status.json"
 ATTACH_DIR = "attachments"
 
 # Ensure attachments directory exists
-ios.makedirs(ATTACH_DIR, exist_ok=True)
+os.makedirs(ATTACH_DIR, exist_ok=True)
 
 # --- Define steps ---
 COMMON_STEPS = [
