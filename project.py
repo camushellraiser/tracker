@@ -205,14 +205,14 @@ if selected:
         pdata['types'] = st.multiselect("Request Type", ['Marketing','Product'], default=pdata['types'], key=f"type_{selected}")
         # Product Steps
         if 'Product' in pdata['types']:
-            st.markdown("---
+                        st.markdown("---
 **Product Steps**")
             for step in PRODUCT_STEPS:
                 val = st.checkbox(step, value=pdata['steps'][step], key=f"p_{selected}_{step}")
                 pdata['steps'][step] = val
         # Marketing Steps
         if 'Marketing' in pdata['types']:
-            st.markdown("---
+                        st.markdown("---
 **Marketing Steps**")
             for step in MARKETING_STEPS:
                 if step == 'Create the AEM project':
