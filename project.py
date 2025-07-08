@@ -131,7 +131,7 @@ if not data.empty:
 if 'selected_project' in st.session_state and st.session_state.selected_project:
     selected = st.session_state.selected_project
     st.header(f"Project {selected}")
-    tabs = st.tabs(["🧭 Project Management", "📎 Documentation"])
+    tabs = st.tabs(["🬭 Project Management", "📌 Documentation"])
 
     # --- Project Management Tab ---
     with tabs[0]:
@@ -159,7 +159,7 @@ if 'selected_project' in st.session_state and st.session_state.selected_project:
 
     # --- Documentation Tab ---
     with tabs[1]:
-        st.markdown("### 📎 Project Documentation")
+        st.markdown("### 📌 Project Documentation")
 
         with st.expander("Upload New Screenshot"):
             uploaded_file = st.file_uploader("Upload PNG/JPG Screenshot", type=["png", "jpg", "jpeg"])
