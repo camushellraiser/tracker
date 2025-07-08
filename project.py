@@ -249,15 +249,19 @@ if selected:
     pdata['notes'] = st.text_area("Notes", pdata['notes'], key='notes')
     st.markdown("**Common Steps**")
     for s in COMMON_STEPS:
-        pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
+        pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
     pdata['types'] = st.multiselect("Request Type", ['Marketing', 'Product'], default=pdata['types'])
     if 'Product' in pdata['types']:
         st.markdown("**Product Steps**")
         for s in PRODUCT_STEPS:
-            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
+            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
     if 'Marketing' in pdata['types']:
         st.markdown("**Marketing Steps**")
         for s in MARKETING_STEPS:
-            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
-    pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP])
+            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
+    pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"{selected}_{FINAL_STEP}")
+
+    if pdata['url']:
+        st.markdown(f"<br><a href='{pdata['url']}' target='_blank'><button style='background-color:#dc3545;color:white;padding:6px 12px;border:none;border-radius:4px;'>Go To Request</button></a>", unsafe_allow_html=True)
+
     save_data()
