@@ -144,7 +144,7 @@ link_styles = """
     </style>
 """
 st.markdown(link_styles, unsafe_allow_html=True)
-st.sidebar.markdown('<div class="custom-button"><a href="https://crg.eu.wordbee-translator.com/a/crg/Access/Login.aspx?x=." target="_blank"><button class="btn-wordbee">Wordbee</button></a></div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="custom-button"><a href="https://crg.eu.wordbee-translator.com/a/crg/Access/Login.aspx?x=" target="_blank"><button class="btn-wordbee">Wordbee</button></a></div>', unsafe_allow_html=True)
 st.sidebar.markdown('<div class="custom-button"><a href="https://author-prod-use1.aemprod.thermofisher.net/sites.html/content" target="_blank"><button class="btn-aem">AEM</button></a></div>', unsafe_allow_html=True)
 st.sidebar.markdown('<div class="custom-button"><a href="https://planner.cloud.microsoft/webui/plan/MdrsNgHhOESzfIwUgXl0C2QAHawF/view/board?tid=a8029e02-891d-4bb6-86d1-1831ab11ed72" target="_blank"><button class="btn-planner">Planner</button></a></div>', unsafe_allow_html=True)
 
