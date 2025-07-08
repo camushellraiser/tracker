@@ -12,13 +12,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Custom Storage Location ---
-BASE_DIR = "/Users/emmanuel.lizares/Documents/Logger"
+# --- Streamlit Cloud-Friendly Path ---
+BASE_DIR = "Logger"
 DATA_FILE = os.path.join(BASE_DIR, "project_status.json")
 ATTACH_DIR = os.path.join(BASE_DIR, "attachments")
 
 # Ensure storage directories exist
-os.makedirs(BASE_DIR, exist_ok=True)
 os.makedirs(ATTACH_DIR, exist_ok=True)
 
 # --- Define steps ---
