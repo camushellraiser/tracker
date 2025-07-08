@@ -150,14 +150,16 @@ st.sidebar.markdown("---")
 st.sidebar.header("📦 Export / Import")
 
 # Export JSON
+st.sidebar.markdown("**⬇️ Export Current Log**", unsafe_allow_html=True)
 json_str = json.dumps(projects, indent=2)
 b64 = base64.b64encode(json_str.encode()).decode()
 fname = f"project_log_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
-href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📥 Download project_status.json</a>'
+href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📁 Download JSON</a>'
 st.sidebar.markdown(href, unsafe_allow_html=True)
 
 # Import JSON
-uploaded_json = st.sidebar.file_uploader("📤 Upload JSON file", type="json")
+st.sidebar.markdown("**⬆️ Import JSON File**", unsafe_allow_html=True)
+uploaded_json = st.sidebar.file_uploader("Choose a file", type="json", label_visibility="collapsed")
 if uploaded_json:
     try:
         loaded_data = json.load(uploaded_json)
@@ -172,12 +174,13 @@ if uploaded_json:
         st.sidebar.error(f"Error loading JSON: {e}")
 
 # Export CSV
-if st.sidebar.button("📄 Export Summary as CSV"):
+st.sidebar.markdown("**📄 Export Summary**", unsafe_allow_html=True)
+if st.sidebar.button("Download CSV"):
     df = get_csv_data()
     csv = df.to_csv(index=False).encode('utf-8')
     csv_fname = f"project_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
     st.sidebar.download_button(
-        label="📄 Download CSV",
+        label="📄 Export Summary as CSV",
         data=csv,
         file_name=csv_fname,
         mime="text/csv"
