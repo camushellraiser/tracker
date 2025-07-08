@@ -11,10 +11,14 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-DATA_FILE = "project_status.json"
-ATTACH_DIR = "attachments"
 
-# Ensure attachments directory exists
+# --- Custom Storage Location ---
+BASE_DIR = "/Users/emmanuel.lizares/Documents/Logger"
+DATA_FILE = os.path.join(BASE_DIR, "project_status.json")
+ATTACH_DIR = os.path.join(BASE_DIR, "attachments")
+
+# Ensure storage directories exist
+os.makedirs(BASE_DIR, exist_ok=True)
 os.makedirs(ATTACH_DIR, exist_ok=True)
 
 # --- Define steps ---
