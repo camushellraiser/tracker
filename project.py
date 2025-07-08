@@ -126,15 +126,53 @@ filtered = [p for p in sorted_projects if not search_term or search_term.lower()
 options = [""] + filtered
 selected = st.sidebar.selectbox("Select Project", options, key="selected_project")
 
+# --- Sidebar: Useful Links ---
+st.sidebar.markdown("---")
+st.sidebar.header("🔗 Useful Links")
+link_styles = """
+    <style>
+    .custom-button a button {
+        width: 100% !important;
+        margin-bottom: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .btn-wordbee { background-color: #f0ad4e; color: white; }
+    .btn-aem { background-color: #5bc0de; color: white; }
+    .btn-planner { background-color: #5cb85c; color: white; }
+    </style>
+"""
+st.markdown(link_styles, unsafe_allow_html=True)
+st.sidebar.markdown('<div class="custom-button"><a href="https://crg.eu.wordbee-translator.com/a/crg/Access/Login.aspx?x=." target="_blank"><button class="btn-wordbee">Wordbee</button></a></div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="custom-button"><a href="https://author-prod-use1.aemprod.thermofisher.net/sites.html/content" target="_blank"><button class="btn-aem">AEM</button></a></div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="custom-button"><a href="https://planner.cloud.microsoft/webui/plan/MdrsNgHhOESzfIwUgXl0C2QAHawF/view/board?tid=a8029e02-891d-4bb6-86d1-1831ab11ed72" target="_blank"><button class="btn-planner">Planner</button></a></div>', unsafe_allow_html=True)
+
 # --- Sidebar: Tools ---
 st.sidebar.markdown("---")
 st.sidebar.header("🛠️ Tools")
-for name, link in [
-    ("Naming Generator","https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/"),
-    ("URL Converter","https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/"),
-    ("Generate Links","https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter")
-]:
-    st.sidebar.markdown(f"<a href='{link}' target='_blank'><button>{name}</button></a>", unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    .custom-tools a button {
+        width: 100% !important;
+        margin-bottom: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        background-color: #eee;
+    }
+    .custom-tools a:nth-child(1) button { background-color: #d9edf7; }
+    .custom-tools a:nth-child(2) button { background-color: #fcf8e3; }
+    .custom-tools a:nth-child(3) button { background-color: #dff0d8; }
+    </style>
+""", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div class="custom-tools">
+    <a href='https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/' target='_blank'><button>Naming Generator</button></a>
+    <a href='https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/' target='_blank'><button>URL Converter</button></a>
+    <a href='https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter' target='_blank'><button>Generate Links</button></a>
+</div>
+""", unsafe_allow_html=True)
 
 # --- Sidebar: Save & Reset ---
 st.sidebar.markdown("---")
