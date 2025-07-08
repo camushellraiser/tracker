@@ -16,8 +16,6 @@ st.set_page_config(
 BASE_DIR = "Logger"
 DATA_FILE = os.path.join(BASE_DIR, "project_status.json")
 ATTACH_DIR = os.path.join(BASE_DIR, "attachments")
-
-# Ensure storage directories exist
 os.makedirs(ATTACH_DIR, exist_ok=True)
 
 # --- Define steps ---
@@ -68,7 +66,6 @@ if 'projects' not in st.session_state:
             st.session_state.projects = json.load(f)
     else:
         st.session_state.projects = {}
-
 projects = st.session_state.projects
 
 # --- Helpers ---
@@ -139,27 +136,28 @@ for name, link in [
 ]:
     st.sidebar.markdown(f"<a href='{link}' target='_blank'><button>{name}</button></a>", unsafe_allow_html=True)
 
-# --- Sidebar: Save, Reset, Export/Import ---
+# --- Sidebar: Save & Reset ---
 st.sidebar.markdown("---")
 if st.sidebar.button("💾 Save Progress"):
     save_data()
     st.sidebar.success("Progress saved.")
-
 if st.sidebar.button("🔄 Reset"):
     st.session_state.clear()
     st.experimental_rerun()
 
-# --- Export JSON ---
-if st.sidebar.button("📥 Export JSON"):
-    json_str = json.dumps(projects, indent=2)
-    b64 = base64.b64encode(json_str.encode()).decode()
-    fname = f"project_log_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
-    href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📁 Download project_status.json</a>'
-    st.sidebar.markdown(href, unsafe_allow_html=True)
+# --- Sidebar: Export / Import Section ---
+st.sidebar.markdown("---")
+st.sidebar.header("📦 Export / Import")
 
-# --- Import JSON ---
-st.sidebar.markdown("### 📤 Import JSON")
-uploaded_json = st.sidebar.file_uploader("Upload JSON file", type="json")
+# Export JSON
+json_str = json.dumps(projects, indent=2)
+b64 = base64.b64encode(json_str.encode()).decode()
+fname = f"project_log_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📥 Download project_status.json</a>'
+st.sidebar.markdown(href, unsafe_allow_html=True)
+
+# Import JSON
+uploaded_json = st.sidebar.file_uploader("📤 Upload JSON file", type="json")
 if uploaded_json:
     try:
         loaded_data = json.load(uploaded_json)
@@ -167,35 +165,35 @@ if uploaded_json:
             projects.update(loaded_data)
             st.session_state.projects = projects
             save_data()
-            st.sidebar.success("JSON data loaded successfully.")
+            st.sidebar.success("✅ JSON data loaded.")
         else:
-            st.sidebar.error("Invalid JSON structure.")
+            st.sidebar.error("⚠️ Invalid JSON structure.")
     except Exception as e:
         st.sidebar.error(f"Error loading JSON: {e}")
 
-# --- Export CSV ---
-if st.sidebar.button("📄 Export CSV"):
+# Export CSV
+if st.sidebar.button("📄 Export Summary as CSV"):
     df = get_csv_data()
     csv = df.to_csv(index=False).encode('utf-8')
-    fname = f"project_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    csv_fname = f"project_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
     st.sidebar.download_button(
         label="📄 Download CSV",
         data=csv,
-        file_name=fname,
+        file_name=csv_fname,
         mime="text/csv"
     )
 
-# --- Title ---
+# --- Main Title ---
 st.title("📋 Project Step Tracker")
 
-# --- Overview ---
+# --- Overview Section ---
 st.subheader("📊 Overview")
 data = get_csv_data()
 if not data.empty:
     html = data.head(10).to_html(index=False, classes='custom')
     st.markdown(f"<div style='max-height:300px;overflow-y:auto;'>{html}</div>", unsafe_allow_html=True)
 
-# --- Details ---
+# --- Project Details Section ---
 if selected:
     st.header(f"Project {selected}")
     pdata = projects[selected]
