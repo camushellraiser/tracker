@@ -91,13 +91,6 @@ def get_csv_data():
         })
     return pd.DataFrame(rows)
 
-# --- CSS Styles ---
-st.markdown("""
-    <style>
-    th { text-align: center !important; }
-    </style>
-""", unsafe_allow_html=True)
-
 # --- Sidebar: Add New Project ---
 st.sidebar.header("➕ New Project ID")
 new_pid = st.sidebar.text_input("Project ID", "GTS", key="new_id")
@@ -133,53 +126,15 @@ filtered = [p for p in sorted_projects if not search_term or search_term.lower()
 options = [""] + filtered
 selected = st.sidebar.selectbox("Select Project", options, key="selected_project")
 
-# --- Sidebar: Useful Links ---
-st.sidebar.markdown("---")
-st.sidebar.header("🔗 Useful Links")
-link_styles = """
-    <style>
-    .custom-button a button {
-        width: 100% !important;
-        margin-bottom: 6px;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-    }
-    .btn-wordbee { background-color: #f0ad4e; color: white; }
-    .btn-aem { background-color: #5bc0de; color: white; }
-    .btn-planner { background-color: #5cb85c; color: white; }
-    </style>
-"""
-st.markdown(link_styles, unsafe_allow_html=True)
-st.sidebar.markdown('<div class="custom-button"><a href="https://crg.eu.wordbee-translator.com/a/crg/Access/Login.aspx?x=." target="_blank"><button class="btn-wordbee">Wordbee</button></a></div>', unsafe_allow_html=True)
-st.sidebar.markdown('<div class="custom-button"><a href="https://author-prod-use1.aemprod.thermofisher.net/sites.html/content" target="_blank"><button class="btn-aem">AEM</button></a></div>', unsafe_allow_html=True)
-st.sidebar.markdown('<div class="custom-button"><a href="https://planner.cloud.microsoft/webui/plan/MdrsNgHhOESzfIwUgXl0C2QAHawF/view/board?tid=a8029e02-891d-4bb6-86d1-1831ab11ed72" target="_blank"><button class="btn-planner">Planner</button></a></div>', unsafe_allow_html=True)
-
 # --- Sidebar: Tools ---
 st.sidebar.markdown("---")
 st.sidebar.header("🛠️ Tools")
-st.markdown("""
-    <style>
-    .custom-tools a button {
-        width: 100% !important;
-        margin-bottom: 6px;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-        background-color: #eee;
-    }
-    .custom-tools a:nth-child(1) button { background-color: #d9edf7; }
-    .custom-tools a:nth-child(2) button { background-color: #fcf8e3; }
-    .custom-tools a:nth-child(3) button { background-color: #dff0d8; }
-    </style>
-""", unsafe_allow_html=True)
-st.sidebar.markdown("""
-<div class="custom-tools">
-    <a href='https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/' target='_blank'><button>Naming Generator</button></a>
-    <a href='https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/' target='_blank'><button>URL Converter</button></a>
-    <a href='https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter' target='_blank'><button>Generate Links</button></a>
-</div>
-""", unsafe_allow_html=True)
+for name, link in [
+    ("Naming Generator","https://namegenerator-3ssw2srhrtzbkcvl69gftj.streamlit.app/"),
+    ("URL Converter","https://urlconverter-gbqjtnrs6padndtgialfur.streamlit.app/"),
+    ("Generate Links","https://aemurlconverter-2urshaxxvjifdezn9ex5hf.streamlit.app/#aem-linguistic-review-links-converter")
+]:
+    st.sidebar.markdown(f"<a href='{link}' target='_blank'><button>{name}</button></a>", unsafe_allow_html=True)
 
 # --- Sidebar: Save & Reset ---
 st.sidebar.markdown("---")
@@ -195,16 +150,14 @@ st.sidebar.markdown("---")
 st.sidebar.header("📦 Export / Import")
 
 # Export JSON
-st.sidebar.markdown("**⬇️ Export Current Log**", unsafe_allow_html=True)
 json_str = json.dumps(projects, indent=2)
 b64 = base64.b64encode(json_str.encode()).decode()
 fname = f"project_log_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
-href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📁 Download JSON</a>'
+href = f'<a href="data:file/json;base64,{b64}" download="{fname}">📥 Download project_status.json</a>'
 st.sidebar.markdown(href, unsafe_allow_html=True)
 
 # Import JSON
-st.sidebar.markdown("**⬆️ Import JSON File**", unsafe_allow_html=True)
-uploaded_json = st.sidebar.file_uploader("Choose a file", type="json", label_visibility="collapsed")
+uploaded_json = st.sidebar.file_uploader("📤 Upload JSON file", type="json")
 if uploaded_json:
     try:
         loaded_data = json.load(uploaded_json)
@@ -219,13 +172,12 @@ if uploaded_json:
         st.sidebar.error(f"Error loading JSON: {e}")
 
 # Export CSV
-st.sidebar.markdown("**📄 Export Summary**", unsafe_allow_html=True)
-if st.sidebar.button("Download CSV"):
+if st.sidebar.button("📄 Export Summary as CSV"):
     df = get_csv_data()
     csv = df.to_csv(index=False).encode('utf-8')
     csv_fname = f"project_summary_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
     st.sidebar.download_button(
-        label="📄 Export Summary as CSV",
+        label="📄 Download CSV",
         data=csv,
         file_name=csv_fname,
         mime="text/csv"
@@ -249,19 +201,15 @@ if selected:
     pdata['notes'] = st.text_area("Notes", pdata['notes'], key='notes')
     st.markdown("**Common Steps**")
     for s in COMMON_STEPS:
-        pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
+        pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
     pdata['types'] = st.multiselect("Request Type", ['Marketing', 'Product'], default=pdata['types'])
     if 'Product' in pdata['types']:
         st.markdown("**Product Steps**")
         for s in PRODUCT_STEPS:
-            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
+            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
     if 'Marketing' in pdata['types']:
         st.markdown("**Marketing Steps**")
         for s in MARKETING_STEPS:
-            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=f"{selected}_{s}")
-    pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP], key=f"{selected}_{FINAL_STEP}")
-
-    if pdata['url']:
-        st.markdown(f"<br><a href='{pdata['url']}' target='_blank'><button style='background-color:#dc3545;color:white;padding:6px 12px;border:none;border-radius:4px;'>Go To Request</button></a>", unsafe_allow_html=True)
-
+            pdata['steps'][s] = st.checkbox(s, value=pdata['steps'][s], key=s)
+    pdata['steps'][FINAL_STEP] = st.checkbox(FINAL_STEP, value=pdata['steps'][FINAL_STEP])
     save_data()
